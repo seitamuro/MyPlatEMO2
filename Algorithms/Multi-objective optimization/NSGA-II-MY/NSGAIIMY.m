@@ -22,22 +22,22 @@ classdef NSGAIIMY < ALGORITHM
             % [~,FrontNo,CrowdDis] = EnvironmentalSelection(Population,Problem.N);
             fitness = calcFitnessByConvhull(Population.objs);
 
-            [~, maxIdx] = max(fitness);
-            plot_fitness_convhull = [mean(calcFitnessByConvhull(Population.objs))];
-            plot_fitness_delaunay = [mean(calcFitnessByDelaunay(Population.objs))];
-            DT = delaunay(Population.objs);
+            %[~, maxIdx] = max(fitness);
+            %plot_fitness_convhull = [mean(calcFitnessByConvhull(Population.objs))];
+            %plot_fitness_delaunay = [mean(calcFitnessByDelaunay(Population.objs))];
+            %DT = delaunay(Population.objs);
 
             cnt = 1;
 
-            DTArc = containers.Map(cnt, DT);
-            PopulationArc = containers.Map(cnt, Population.objs);
+            %DTArc = containers.Map(cnt, DT);
+            %PopulationArc = containers.Map(cnt, Population.objs);
             %plot_fitness_convhull = containers.Map(1, [0 total_sum_edges(Population.objs)]);
             %plot_fitness_delaunay = containers.Map
 
-            fig = uifigure();
-            sld = uislider(fig, "Position", [150 150 120 3], "ValueChangedFcn", @(sld, event) updateSld(sld, DTArc, PopulationArc, plot_fitness_convhull, plot_fitness_delaunay));
-            field = uieditfield(fig, "numeric", "Position", [150, 180, 100, 22], "ValueChangedFcn", @(field, ~) changeSliderValue(sld, field, DTArc, PopulationArc, plot_fitness_convhull, plot_fitness_delaunay));
-            updateSldProp(sld, cnt);
+            %fig = uifigure();
+            %sld = uislider(fig, "Position", [150 150 120 3], "ValueChangedFcn", @(sld, event) updateSld(sld, DTArc, PopulationArc, plot_fitness_convhull, plot_fitness_delaunay));
+            %field = uieditfield(fig, "numeric", "Position", [150, 180, 100, 22], "ValueChangedFcn", @(field, ~) changeSliderValue(sld, field, DTArc, PopulationArc, plot_fitness_convhull, plot_fitness_delaunay));
+            %updateSldProp(sld, cnt);
             %% Optimization
             while Algorithm.NotTerminated(Population)
                 MatingPool = TournamentSelection(2,Problem.N,-fitness);
@@ -48,18 +48,18 @@ classdef NSGAIIMY < ALGORITHM
                 fitness = calcFitnessByConvhull(Population.objs);
 
                 cnt = cnt + 1;
-                disp("----plot_fitness_convhull");
-                disp(plot_fitness_convhull(cnt-1));
-                disp("---mean");
-                disp(mean(calcFitnessByConvhull(Population.objs)));
-                disp(length(horzcat(plot_fitness_convhull(cnt-1), mean(calcFitnessByConvhull(Population.objs)))));
-                disp(length(plot_fitness_convhull));
-                plot_fitness_convhull(cnt) = horzcat(plot_fitness_convhull(cnt-1), mean(calcFitnessByConvhull(Population.objs)));
-                plot_fitness_delaunay(cnt) = horzcat(plot_fitness_delaunay(cnt-1), mean(calcFitnessByDelaunay(Population.objs)));
-                updateSldProp(sld, cnt);
-                all = Population.objs;
-                DTArc(cnt) = delaunay(all);
-                PopulationArc(cnt) = all;
+                %disp("----plot_fitness_convhull");
+                %disp(plot_fitness_convhull(cnt-1));
+                %disp("---mean");
+                %disp(mean(calcFitnessByConvhull(Population.objs)));
+                %disp(length(horzcat(plot_fitness_convhull(cnt-1), mean(calcFitnessByConvhull(Population.objs)))));
+                %disp(length(plot_fitness_convhull));
+                %plot_fitness_convhull(cnt) = horzcat(plot_fitness_convhull(cnt-1), mean(calcFitnessByConvhull(Population.objs)));
+                %plot_fitness_delaunay(cnt) = horzcat(plot_fitness_delaunay(cnt-1), mean(calcFitnessByDelaunay(Population.objs)));
+                %updateSldProp(sld, cnt);
+                %all = Population.objs;
+                %DTArc(cnt) = delaunay(all);
+                %PopulationArc(cnt) = all;
             end
         end
     end
