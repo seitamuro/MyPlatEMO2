@@ -20,46 +20,53 @@ classdef NSGAIIMY < ALGORITHM
             %% Generate random population
             Population = Problem.Initialization();
             % [~,FrontNo,CrowdDis] = EnvironmentalSelection(Population,Problem.N);
-            fitness = calcFitnessByConvhull(Population.objs);
+            %fitness = calcFitnessByConvhull(Population.objs);
+            fitness = calcFitnessByDelaunay(Population.objs);
 
-            %[~, maxIdx] = max(fitness);
-            %plot_fitness_convhull = [mean(calcFitnessByConvhull(Population.objs))];
-            %plot_fitness_delaunay = [mean(calcFitnessByDelaunay(Population.objs))];
-            %DT = delaunay(Population.objs);
+            mean_fitness = zeros(1, 25000);
+            min_fitness = zeros(1, 25000);
+            max_fitness = zeros(1, 25000);
 
             cnt = 1;
 
-            %DTArc = containers.Map(cnt, DT);
-            %PopulationArc = containers.Map(cnt, Population.objs);
-            %plot_fitness_convhull = containers.Map(1, [0 total_sum_edges(Population.objs)]);
-            %plot_fitness_delaunay = containers.Map
+            mean_fitness(cnt) = mean(fitness);
+            min_fitness(cnt) = min(fitness);
+            max_fitness(cnt) = max(fitness);
 
-            %fig = uifigure();
-            %sld = uislider(fig, "Position", [150 150 120 3], "ValueChangedFcn", @(sld, event) updateSld(sld, DTArc, PopulationArc, plot_fitness_convhull, plot_fitness_delaunay));
-            %field = uieditfield(fig, "numeric", "Position", [150, 180, 100, 22], "ValueChangedFcn", @(field, ~) changeSliderValue(sld, field, DTArc, PopulationArc, plot_fitness_convhull, plot_fitness_delaunay));
-            %updateSldProp(sld, cnt);
+            figure;
+            h1 = plot(1, mean_fitness(cnt), "r-");
+            hold on;
+            h2 = plot(1,  min_fitness(cnt), "g-");
+            h3 = plot(1, max_fitness(cnt), "b-");
+            xlabel("Generation");
+            ylabel("Average Fitness");
+            legend("Mean fitness", "Min fitness", "Max fitness");
+
             %% Optimization
             while Algorithm.NotTerminated(Population)
                 MatingPool = TournamentSelection(2,Problem.N,-fitness);
                 Offspring  = OperatorGA(Problem,Population(MatingPool));
                 allPopulation = [Population Offspring];
-                [~, sortIndex] = sort(calcFitnessByConvhull(allPopulation.objs),'descend');
+                %[~, sortIndex] = sort(calcFitnessByConvfull(allPopulation.objs),'descend');
+                [~, sortIndex] = sort(calcFitnessByDelaunay(allPopulation.objs),'descend');
                 Population = allPopulation(sortIndex(1:Problem.N));
-                fitness = calcFitnessByConvhull(Population.objs);
+                %fitness = calcFitnessByConvhull(Population.objs);
+                fitness = calcFitnessByDelaunay(Population.objs);
 
                 cnt = cnt + 1;
-                %disp("----plot_fitness_convhull");
-                %disp(plot_fitness_convhull(cnt-1));
-                %disp("---mean");
-                %disp(mean(calcFitnessByConvhull(Population.objs)));
-                %disp(length(horzcat(plot_fitness_convhull(cnt-1), mean(calcFitnessByConvhull(Population.objs)))));
-                %disp(length(plot_fitness_convhull));
-                %plot_fitness_convhull(cnt) = horzcat(plot_fitness_convhull(cnt-1), mean(calcFitnessByConvhull(Population.objs)));
-                %plot_fitness_delaunay(cnt) = horzcat(plot_fitness_delaunay(cnt-1), mean(calcFitnessByDelaunay(Population.objs)));
-                %updateSldProp(sld, cnt);
-                %all = Population.objs;
-                %DTArc(cnt) = delaunay(all);
-                %PopulationArc(cnt) = all;
+
+                mean_fitness(cnt) = mean(fitness);
+                min_fitness(cnt) = min(fitness);
+                max_fitness(cnt) = max(fitness);
+                disp("---");
+                disp(min_fitness(cnt));
+                disp(mean_fitness(cnt));
+                disp(max_fitness(cnt));
+ 
+                set(h1, 'XData', 1:cnt, 'YData', mean_fitness(1:cnt));
+                set(h2, 'XData', 1:cnt, 'YData', min_fitness(1:cnt));
+                set(h3, 'XData', 1:cnt, 'YData', max_fitness(1:cnt));
+                drawnow;
             end
         end
     end
@@ -133,10 +140,9 @@ end
 
 function fitness = calcFitnessByDelaunay(all)
     % allの凸包を計算し、その面積をtotal_areaに保存
-    % [~, total_area] = convhull(all);
+    [~, total_area] = convhull(all);
     
     % ドロネー三角形分割し、すべての辺の長さの総和を求める
-    all = [1 0; 0 0; 0 1; 1 1; 2 2];
     total_edges = total_sum_edges(all);
 
     % fitnessを初期化
