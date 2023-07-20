@@ -47,7 +47,7 @@ classdef NSGAIIMY < ALGORITHM
                 MatingPool = TournamentSelection(2,Problem.N,-fitness);
                 Offspring  = OperatorGA(Problem,Population(MatingPool));
                 allPopulation = [Population Offspring];
-                %[~, sortIndex] = sort(calcFitnessByConvfull(allPopulation.objs),'descend');
+                %[~, sortIndex] = sort(calcFitnessByConvhull(allPopulation.objs),'descend');
                 [~, sortIndex] = sort(calcFitnessByDelaunay(allPopulation.objs),'descend');
                 Population = allPopulation(sortIndex(1:Problem.N));
                 %fitness = calcFitnessByConvhull(Population.objs);
@@ -58,10 +58,6 @@ classdef NSGAIIMY < ALGORITHM
                 mean_fitness(cnt) = mean(fitness);
                 min_fitness(cnt) = min(fitness);
                 max_fitness(cnt) = max(fitness);
-                disp("---");
-                disp(min_fitness(cnt));
-                disp(mean_fitness(cnt));
-                disp(max_fitness(cnt));
  
                 set(h1, 'XData', 1:cnt, 'YData', mean_fitness(1:cnt));
                 set(h2, 'XData', 1:cnt, 'YData', min_fitness(1:cnt));
@@ -99,7 +95,26 @@ end
 
 function total = total_sum_edges(all)
     % ドロネー三角形分割する
-    DT = delaunay(all);  
+
+    % Find unique rows while preserving the order
+    [uniqueData, ~, ic] = unique(all, 'rows', 'stable');
+    
+    % Count the number of occurrences of each unique row
+    counts = histc(ic, 1:size(uniqueData, 1));
+    
+    % Find the indices of rows that occur more than once
+    duplicateIndices = find(counts > 1);
+    
+    % Retrieve the actual duplicate rows
+    duplicateData = uniqueData(duplicateIndices, :);
+
+    disp("DuplicateIndices");
+    disp(duplicateIndices);
+    disp("DuplicateData");
+    disp(duplicateData);
+
+    DT = delaunay(all); 
+    warning('error', 'MATLAB:delaunay:DupPtsDelaunayWarnId');
 
     % 各三角形の辺の長さの合計を求める
     total = sum(sqrt(sum((all(DT(:, 1), :) - all(DT(:, end), :)).^2, 1)));
@@ -111,10 +126,6 @@ end
 function fitness = calcFitnessByConvhull(all)
     % allの凸包を計算し、その面積をtotal_areaに保存
     [~, total_area] = convhull(all);
-    
-    % ドロネー三角形分割し、すべての辺の長さの総和を求める
-    %all = [1 0; 0 0; 0 1; 1 1; 2 2];
-    %total_edges = total_sum_edges(all);
 
     % fitnessを初期化
     fitness = zeros(length(all),1);
@@ -139,9 +150,6 @@ function fitness = calcFitnessByConvhull(all)
 end
 
 function fitness = calcFitnessByDelaunay(all)
-    % allの凸包を計算し、その面積をtotal_areaに保存
-    [~, total_area] = convhull(all);
-    
     % ドロネー三角形分割し、すべての辺の長さの総和を求める
     total_edges = total_sum_edges(all);
 
@@ -150,9 +158,20 @@ function fitness = calcFitnessByDelaunay(all)
     
     for i = 1:length(all)
         % allから現在の要素を除去
-        subset = all;
-        subset(i,:) = [];
-        
+        subset = unique(all, 'rows','stable');
+
+        % all(i)と一致する行をsubsetから削除
+        idx = ismember(subset, all(i,:), 'rows');
+        subset(idx, :) = [];
+
+        disp("subset");
+        disp(subset);
+        disp("duplicate check");
+        disp(length(subset));
+        disp(length(unique(subset, "rows", "stable")));
+        disp("idx");
+        disp(idx);
+
         % subsetの凸包の面積を計算
         % [~, subset_area] = convhull(subset);
 
