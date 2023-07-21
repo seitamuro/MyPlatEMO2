@@ -108,11 +108,6 @@ function total = total_sum_edges(all)
     % Retrieve the actual duplicate rows
     duplicateData = uniqueData(duplicateIndices, :);
 
-    disp("DuplicateIndices");
-    disp(duplicateIndices);
-    disp("DuplicateData");
-    disp(duplicateData);
-
     DT = delaunay(all); 
     warning('error', 'MATLAB:delaunay:DupPtsDelaunayWarnId');
 
@@ -151,7 +146,7 @@ end
 
 function fitness = calcFitnessByDelaunay(all)
     % ドロネー三角形分割し、すべての辺の長さの総和を求める
-    total_edges = total_sum_edges(all);
+    total_edges = total_sum_edges(unique(all, "rows", "stable"));
 
     % fitnessを初期化
     fitness = zeros(length(all),1);
@@ -163,14 +158,6 @@ function fitness = calcFitnessByDelaunay(all)
         % all(i)と一致する行をsubsetから削除
         idx = ismember(subset, all(i,:), 'rows');
         subset(idx, :) = [];
-
-        disp("subset");
-        disp(subset);
-        disp("duplicate check");
-        disp(length(subset));
-        disp(length(unique(subset, "rows", "stable")));
-        disp("idx");
-        disp(idx);
 
         % subsetの凸包の面積を計算
         % [~, subset_area] = convhull(subset);
