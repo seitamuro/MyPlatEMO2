@@ -20,24 +20,41 @@ classdef NSGAIIMY < ALGORITHM
             %% Generate random population
             Population = Problem.Initialization();
             % [~,FrontNo,CrowdDis] = EnvironmentalSelection(Population,Problem.N);
-            %fitness = calcFitnessByConvhull(Population.objs);
-            fitness = calcFitnessByDelaunay(Population.objs);
+            fitness = calcFitnessByConvhull(Population.objs);
+            %fitness = calcFitnessByDelaunay(Population.objs);
 
             mean_fitness = zeros(1, 25000);
             min_fitness = zeros(1, 25000);
             max_fitness = zeros(1, 25000);
+            mean_fitness_ = zeros(1, 25000);
+            min_fitness_ = zeros(1, 25000);
+            max_fitness_ = zeros(1, 25000);
 
             cnt = 1;
 
+            fitness_ = calcFitnessByDelaunay(Population.objs);
+            mean_fitness_(cnt) = mean(fitness_);
+            min_fitness_(cnt) = min(fitness_);
+            max_fitness_(cnt) = max(fitness_);
+            fitness = calcFitnessByDelaunay(Population.objs);
             mean_fitness(cnt) = mean(fitness);
             min_fitness(cnt) = min(fitness);
             max_fitness(cnt) = max(fitness);
 
-            figure;
-            h1 = plot(1, mean_fitness(cnt), "r-");
+            figure(1);
+            h11 = plot(1, mean_fitness_(cnt), "r-");
             hold on;
-            h2 = plot(1,  min_fitness(cnt), "g-");
-            h3 = plot(1, max_fitness(cnt), "b-");
+            h12 = plot(1,  min_fitness_(cnt), "g-");
+            h13 = plot(1, max_fitness_(cnt), "b-");
+            xlabel("Generation");
+            ylabel("Average Fitness");
+            legend("Mean fitness", "Min fitness", "Max fitness");
+
+            figure(2);
+            h21 = plot(1, mean_fitness(cnt), "r-");
+            hold on;
+            h22 = plot(1,  min_fitness(cnt), "g-");
+            h23 = plot(1, max_fitness(cnt), "b-");
             xlabel("Generation");
             ylabel("Average Fitness");
             legend("Mean fitness", "Min fitness", "Max fitness");
@@ -47,21 +64,33 @@ classdef NSGAIIMY < ALGORITHM
                 MatingPool = TournamentSelection(2,Problem.N,-fitness);
                 Offspring  = OperatorGA(Problem,Population(MatingPool));
                 allPopulation = [Population Offspring];
-                %[~, sortIndex] = sort(calcFitnessByConvhull(allPopulation.objs),'descend');
-                [~, sortIndex] = sort(calcFitnessByDelaunay(allPopulation.objs),'descend');
+                [~, sortIndex] = sort(calcFitnessByConvhull(allPopulation.objs),'descend');
+                %[~, sortIndex] = sort(calcFitnessByDelaunay(allPopulation.objs),'descend');
                 Population = allPopulation(sortIndex(1:Problem.N));
-                %fitness = calcFitnessByConvhull(Population.objs);
-                fitness = calcFitnessByDelaunay(Population.objs);
+                fitness = calcFitnessByConvhull(Population.objs);
+                %fitness = calcFitnessByDelaunay(Population.objs);
 
                 cnt = cnt + 1;
 
+                
+                fitness_ = calcFitnessByDelaunay(Population.objs);
+                mean_fitness_(cnt) = mean(fitness_);
+                min_fitness_(cnt) = min(fitness_);
+                max_fitness_(cnt) = max(fitness_);
                 mean_fitness(cnt) = mean(fitness);
                 min_fitness(cnt) = min(fitness);
                 max_fitness(cnt) = max(fitness);
  
-                set(h1, 'XData', 1:cnt, 'YData', mean_fitness(1:cnt));
-                set(h2, 'XData', 1:cnt, 'YData', min_fitness(1:cnt));
-                set(h3, 'XData', 1:cnt, 'YData', max_fitness(1:cnt));
+                figure(1);
+                set(h11, 'XData', 1:cnt, 'YData', mean_fitness_(1:cnt));
+                set(h12, 'XData', 1:cnt, 'YData', min_fitness_(1:cnt));
+                set(h13, 'XData', 1:cnt, 'YData', max_fitness_(1:cnt));
+                drawnow;
+
+                figure(2);
+                set(h21, 'XData', 1:cnt, 'YData', mean_fitness(1:cnt));
+                set(h22, 'XData', 1:cnt, 'YData', min_fitness(1:cnt));
+                set(h23, 'XData', 1:cnt, 'YData', max_fitness(1:cnt));
                 drawnow;
             end
         end
